@@ -8,9 +8,10 @@ Created on Tue August 4
 This file downsamples the time step of ERA5 netCDF files, aggregating variables.
 
 Intermediate outputs:
-    (1) Monthly total precipitation in monthly files
+    (1) Monthly total precipitation in yearly files
+    (2) Yearly total precipitation in yearly files
 Final output:
-    (4) Yearly total precipitation for all years in one file.
+    (3) Mean annual precipitation for all years in one file.
     
 """
 from download_ERA5_monthly import download_ERA5_monthly
@@ -43,8 +44,7 @@ def monthly_to_yearly():
     # aggregate data to yearly time steps
     time_res = '1Y'
 
-    # Directory for daily files
-    # 1 file per year with daily data
+    # Directory for yearly files
     yearly_dir = '/Users/jashvina/jashvina/GoogleDrive/My Drive/2019_2020_wind_'\
           'extremes/Data/ERA5/monthly_to_yearly/yearly/'
           
