@@ -18,7 +18,7 @@ https://confluence.ecmwf.int/display/CKB/How+to+download+ERA5#HowtodownloadERA5-
 import cdsapi
 import os
 
-def download_ERA5(varnames, years, months, days, output_dir):
+def download_ERA5_hourly(varnames, years, months, days, output_dir, filename_suffix = None):
     '''
     This script downloads ERA5 hourly data, with one file for each day.
 
@@ -35,6 +35,8 @@ def download_ERA5(varnames, years, months, days, output_dir):
         List with each day of interest in 'DD' format..
     output_dir : str
         filepath for output files
+    filename_suffix: str (optional)
+        optional string to add to the end of filename (e.g. describing variables)
 
     Returns
     -------
@@ -61,16 +63,12 @@ def download_ERA5(varnames, years, months, days, output_dir):
                             '18:00', '19:00', '20:00',
                             '21:00', '22:00', '23:00',
                         ],
-                        'day': [
-                            day,
-            
-                        ],
-                        'month': [
-                            month
-                        ],
-                        'year': [
-                            year,
-                        ],
+                        'day': day,
+                        
+                        'month': month,
+                        
+                        'year': year,
+                        
                     'variable': varnames
                     },
-                    '{}-{}-{}_ERA5_hourly_precip_wind.nc'.format(year, month, day))
+                    '{}-{}-{}_ERA5_hourly_{}.nc'.format(year, month, day, filename_suffix))
