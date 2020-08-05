@@ -9,9 +9,8 @@ This file downsamples the time step of ERA5 netCDF files, aggregating variables.
 
 Intermediate outputs:
     (1) Monthly total precipitation in yearly files
-    (2) Yearly total precipitation in yearly files
 Final output:
-    (3) Mean annual precipitation for all years in one file.
+    (2) Yearly total precipitation in yearly files
     
 """
 from download_ERA5_monthly import download_ERA5_monthly
