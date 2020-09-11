@@ -20,7 +20,8 @@ import os
 
 def download_ERA5_hourly(varnames, years, months, days, output_dir, filename_suffix = None):
     '''
-    This script downloads ERA5 hourly data, with one file for each day.
+    This script downloads ERA5 hourly data, with one file with 24 hours of data
+    for each day.
 
     Parameters
     ----------
@@ -40,11 +41,17 @@ def download_ERA5_hourly(varnames, years, months, days, output_dir, filename_suf
 
     Returns
     -------
-    ERA5 downloads, with one file for each day, saved to the output directory.
+    ERA5 hourly data, with one file for each day, saved to the output directory.
 
     '''
     os.chdir(output_dir)
     c = cdsapi.Client()
+    
+    # File naming
+    if filename_suffix == None:
+        fn_suffix = ''
+    else:
+        fn_suffix = '_' + filename_suffix
     
     for year in years:
         for month in months:
@@ -71,4 +78,4 @@ def download_ERA5_hourly(varnames, years, months, days, output_dir, filename_suf
                         
                     'variable': varnames
                     },
-                    '{}-{}-{}_ERA5_hourly_{}.nc'.format(year, month, day, filename_suffix))
+                    '{}-{}-{}_ERA5_hourly{}.nc'.format(year, month, day, fn_suffix))
