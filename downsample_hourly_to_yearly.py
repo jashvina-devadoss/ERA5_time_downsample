@@ -66,7 +66,7 @@ def downsample_daily_yearly():
             # Get a list of downloaded files
             files = []
             for filename in os.listdir(ERA5_download_dir):
-                if filename.startswith(year) and filename.endswith('.nc'):
+                if filename.startswith(year[0]) and filename.endswith('.nc'):
                     files.append(filename)
                 else:
                     continue
@@ -85,7 +85,6 @@ def downsample_daily_yearly():
             downloaded_files = []
                     
             for filename in files:
-                if filename.startswith(year + '-' + month):
                     downloaded_files.append(filename)
                     # MUST SORT FILES to keep dates in order
                     downloaded_files.sort()   
@@ -115,7 +114,7 @@ def downsample_daily_yearly():
             
             daily_files = []
                     
-            for filename in os.listdir(agg_dir):
+            for filename in os.listdir(daily_dir):
                 if filename.endswith('.nc'):
                     daily_files.append(filename)
                     daily_files.sort()   
@@ -145,7 +144,7 @@ def downsample_daily_yearly():
                 monthly_files.append(filename)
                 
         monthly_files.sort()
-        fname = year + '_ERA5' + monthly_files[0].split('ERA5')[-1]
+        fname = year[0] + '_ERA5' + monthly_files[0].split('ERA5')[-1]
         
         aggregate_files(monthly_dir, monthly_files, year_monthly_dir + fname)
         '''
