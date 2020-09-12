@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 11 14:42:39 2020
+Created on Fri Sep 11 4:42:01 2020
 
 @author: jashvina
 
-This file downsamples hourly data to yearly data.  It is designed for a 
-computer with limited processing power/storage space (small chunks at a time).
-
-Intermediate outputs:
-    (1) Monthly data
-
-Final output:
-    (1) Yearly data
+This file downloads ERA5 hourly data and outputs monthly and yearly data
 """
-
+import os
 from download_ERA5_hourly import download_ERA5_hourly
-from netcdf_time_downsample import windspeed, aggregate_files, time_downsample
+from netcdf_time_downsample import windspeed, time_downsample
 
-def downsample_daily_monthly_yearly():
+def downsample_daily_yearly():
     '''
-    Download ERA5 hourly data for the listed variables. 
+    (1) Download ERA5 hourly data, month by month, with daily files.
+    (2) Downsample hourly files to daily timesteps, with 1 output file for month.
+    (3) Downsample to monthly timesteps, with one output file per month.
     
+    (4) Aggregate file to one file per year with monthly timesteps.
+    (5) Downsample to yearly timesteps, with one output file for the time period.
     '''
     
     # with one file for each day on the specified dates.
@@ -29,110 +26,156 @@ def downsample_daily_monthly_yearly():
                '10m_u_component_of_wind',
                '10m_v_component_of_wind',
                ]
-
-    startyear = 1982
-    endyear = 2019
-    startmonth = 1
-    endmonth = 12
-    startday = 1
-    endday = 31
-
+    
+    startyear = 2000
+    endyear = 2001
+    startmonth = 3
+    endmonth = 4
+    startday = 5
+    endday = 6
+    
     years = []
     for i in range(startyear, endyear+1):
-        years.append(str(i))
-
+        years.append([str(i)])
+    
     months = []
     for j in range(startmonth,endmonth+1):
         if j < 10:
             j = '0'+str(j)
-        months.append(str(j))
-
+        months.append([str(j)])
+    
     days = []
     for k in range(startday, endday+1):
         if k < 10:
             k = '0'+str(k)
         days.append(str(k))
-
-    ERA5_download_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
-                        'Data/ERA5/Test/Outputs/00_downloads/'
-
-    download_ERA5_hourly(varnames, years, months, days, output_dir = ERA5_download_dir)
- 
-    '''
-    Downsample hourly files to daily timesteps, with 1 output file for month.
-    '''
     
-    # Get a list of downloaded files
-    files = []
-    for year in years:
-        for filename in os.listdir(ERA5_download_dir):
-            if filename.startswith(year) and filename.endswith('.nc'):
-                files.append(filename)
-            else:
-                continue
-    
-    assert len(files) == 8
-    print(files)
-    
-    var_lst = [['u10', 'v10'], 'tp']
-    op_lst = ['max', 'sum']
-    var_names = ['windspeed', 'totalprecip']
-    # aggregate data to daily time steps
-    timeres = '1D'
-    windspeeds = True
-    daily_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
-                        'Data/ERA5/Test/Outputs/01_downsample/'
-    
-    # Run groups of files by date (in this case, we want one file per month)
     for year in years:
         for month in months:
+    
+            ERA5_download_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
+                                'Data/ERA5/daily_to_yearly/00_hourly_download/'
+        
+            download_ERA5_hourly(varnames, year, month, days, output_dir = ERA5_download_dir)
+        
+        
+            '''
+            (2) Downsample hourly files to daily timesteps, with 1 output file for month.
+            '''
             
-            file_group = []
+            # Get a list of downloaded files
+            files = []
+            for filename in os.listdir(ERA5_download_dir):
+                if filename.startswith(year) and filename.endswith('.nc'):
+                    files.append(filename)
+                else:
+                    continue
             
+            
+            var_lst = [['u10', 'v10'], 'tp']
+            op_lst = ['max', 'sum']
+            var_names = ['windspeed', 'totalprecip']
+            # aggregate data to daily time steps
+            timeres = '1D'
+            windspeed = True
+            daily_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
+                                'Data/ERA5/daily_to_yearly/01_month_daily/'
+        
+            # Run groups of files by date (in this case, we want one file per month)
+            downloaded_files = []
+                    
             for filename in files:
                 if filename.startswith(year + '-' + month):
-                    file_group.append(filename)
-                
-            time_downsample(input_dir = ERA5_download_dir, input_files = file_group, 
+                    downloaded_files.append(filename)
+                    # MUST SORT FILES to keep dates in order
+                    downloaded_files.sort()   
+                    
+                    time_downsample(input_dir = ERA5_download_dir, input_files = downloaded_files,
+                                    var = var_lst, op = op_lst, time_res = timeres, 
+                                    output_dir = daily_dir, varnames = var_names,
+                                    wind_speed = windspeed)
+            '''
+            # Delete downloads (to save storage space)
+            for file in downloaded_files:
+                os.remove(ERA5_download_dir + file)
+            '''
+            
+            '''
+            (3) Downsample to monthly timesteps, with one output file per month.
+            '''
+            
+            monthly_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
+                                'Data/ERA5/daily_to_yearly/02_monthly/'
+                         
+            var_lst = ['ws10', 'tp']
+            op_lst = ['max', 'sum']
+            var_names = ['windspeed', 'totalprecip']
+            # aggregate data to monthly time steps
+            timeres = '1M'
+            
+            daily_files = []
+                    
+            for filename in os.listdir(agg_dir):
+                if filename.endswith('.nc'):
+                    daily_files.append(filename)
+                    daily_files.sort()   
+                    
+            # Downsample by year
+            time_downsample(input_dir = daily_dir, input_files = daily_files, 
                             var = var_lst, op = op_lst, time_res = timeres, 
-                            output_dir = daily_dir, varnames = var_names, 
-                            wind_speed = windspeed)
- 
-    '''
-    Aggregate the files to one file per year (with daily time steps)
-    '''
+                            output_dir = monthly_dir, varnames = var_names)
+            '''
+            # Delete daily time step files to save storage space
+            for file in daily_dir:
+                os.remove(daily_dir + daily_files)
+            '''
+
+        '''
+        (4) Aggregate files to 1 file per year with monthly timesteps.
+        '''
+        year_monthly_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
+                            'Data/ERA5/daily_to_yearly/03_year_monthly/'
+                            
     
-    agg_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
-                        'Data/ERA5/Test/Outputs/02_aggregate/'
-    
-    # Get a list of downsampled files, and aggregate by year
-    for year in years:
-        file_group = []
-        for filename in os.listdir(daily_dir):
-            if filename.startswith(year) and filename.endswith('.nc'):
-                file_group.append(filename)
-        fname = year + '_' + file_group[0].split('_', maxsplit = 1)[-1]
-        aggregate_files(daily_dir, file_group, agg_dir + fname)
+            
+        monthly_files = []
+        for filename in os.listdir(monthly_dir):
+            # Remember that `year` is a list, since `years` is a list of lists
+            if filename.startswith(year[0]) and filename.endswith('.nc'):
+                monthly_files.append(filename)
+                
+        monthly_files.sort()
+        fname = year + '_ERA5' + monthly_files[0].split('ERA5')[-1]
         
+        aggregate_files(monthly_dir, monthly_files, year_monthly_dir + fname)
+        '''
+        # Delete daily time step files to save storage space
+        for file in monthly_dir:
+            os.remove(monthly_dir + monthly_files)
+        '''
+            
     '''
-    Downsample by year, with one output file spanning years.
+    (5) Downsample to yearly timesteps.
     '''
-    
     yearly_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
-                 'Data/ERA5/Test/Outputs/03_downsample/'
-                 
-    var_lst = [['ws10'], 'tp']
+                            'Data/ERA5/daily_to_yearly/04_yearly/'
+    
+    var_lst = ['ws10', 'tp']
     op_lst = ['max', 'sum']
     var_names = ['windspeed', 'totalprecip']
     # aggregate data to yearly time steps
     timeres = '1Y'
     
+    year_monthly_files = []
+            
+    for filename in os.listdir(year_monthly_dir):
+        if filename.endswith('.nc'):
+            year_monthly_files.append(filename)
+            year_monthly_files.sort()   
+            
     # Downsample by year
-    time_downsample(input_dir = agg_dir, input_files = file_group, 
+    time_downsample(input_dir = year_monthly_dir, input_files = year_monthly_files, 
                     var = var_lst, op = op_lst, time_res = timeres, 
                     output_dir = yearly_dir, varnames = var_names)
     
-    
-    
-
-test_downsample_daily_yearly()
+downsample_daily_yearly()

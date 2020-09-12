@@ -77,7 +77,7 @@ def test_downsample_daily_yearly():
     windspeed = True
     daily_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
                         'Data/ERA5/Test/Outputs/01_downsample/'
-    
+
     # Run groups of files by date (in this case, we want one file per month)
     for year in years:
         for month in months:
@@ -88,12 +88,12 @@ def test_downsample_daily_yearly():
                 if filename.startswith(year + '-' + month):
                     file_group.append(filename)
             file_group.sort()   
-            time_downsample(input_dir = ERA5_download_dir, input_files = file_group, 
-                            var = var_lst, op = op_lst, time_res = timeres, 
-                            output_dir = daily_dir, varnames = var_names, 
-                            wind_speed = windspeed)
             
-     
+            time_downsample(input_dir = ERA5_download_dir, input_files = file_group,
+                            var = var_lst, op = op_lst, time_res = timeres, 
+                            output_dir = daily_dir, varnames = var_names,
+                            wind_speed = windspeed)
+    
     '''
     Aggregate the files to one file per year (with daily time steps)
     '''
@@ -107,6 +107,7 @@ def test_downsample_daily_yearly():
         for filename in os.listdir(daily_dir):
             if filename.startswith(year) and filename.endswith('.nc'):
                 file_group.append(filename)
+        file_group.sort()
         fname = year + '_ERA5' + file_group[0].split('ERA5')[-1]
         aggregate_files(daily_dir, file_group, agg_dir + fname)
         
@@ -117,7 +118,7 @@ def test_downsample_daily_yearly():
     yearly_dir = '/Users/jashvina/jashvina/Projects/2019_2020_wind_extremes/' \
                  'Data/ERA5/Test/Outputs/03_downsample/'
                  
-    var_lst = [['ws10'], 'tp']
+    var_lst = ['ws10', 'tp']
     op_lst = ['max', 'sum']
     var_names = ['windspeed', 'totalprecip']
     # aggregate data to yearly time steps
@@ -134,7 +135,6 @@ def test_downsample_daily_yearly():
     time_downsample(input_dir = agg_dir, input_files = file_group, 
                     var = var_lst, op = op_lst, time_res = timeres, 
                     output_dir = yearly_dir, varnames = var_names)
-    
     
     
 

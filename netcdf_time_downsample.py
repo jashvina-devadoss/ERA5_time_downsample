@@ -122,7 +122,7 @@ def time_downsample(input_dir, input_files, var, op, time_res, output_dir, varna
                             ds_agg = ds[ws].resample(time = time_res).mean()
                             if type(ds_agg) == xr.core.dataarray.DataArray:
                                 ds_agg = ds_agg.to_dataset()
-    
+
                     else:
                         # Resample by time, using selected aggregation method
                         if op[index] == 'max':
@@ -165,9 +165,9 @@ def time_downsample(input_dir, input_files, var, op, time_res, output_dir, varna
         # File naming
         # Get the first and dates in the dataset as a string
         start_date = str(np.array(agg.isel(time = 0).time.values, 
-                              dtype = 'datetime64[{}]'.format(time_res)).item())
+                              dtype = 'datetime64[{}]'.format('1D')).item())
         edate = str(np.array(agg.isel(time = -1).time.values, 
-                              dtype = 'datetime64[{}]'.format(time_res)).item())
+                              dtype = 'datetime64[{}]'.format('1D')).item())
 
         if start_date == edate:
             end_date = ''
