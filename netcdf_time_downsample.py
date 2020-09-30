@@ -30,7 +30,8 @@ def aggregate_files(input_dir, input_files, output_filepath):
     input_dir: str
         Input file directory.
     input_files : list of strings
-        Input netCDF files to concatenate by time.
+        Input netCDF files to concatenate by time. Filenames must be a sequence in
+        chronological order.
     output_dir: str
         File path for output directory.
 
@@ -43,6 +44,7 @@ def aggregate_files(input_dir, input_files, output_filepath):
     for file in input_files:
         ds = xr.open_dataset(input_dir + file)
         agg_lst.append(ds)
+        del(ds)
     
     agg = xr.concat(agg_lst, dim = 'time')
     
@@ -106,8 +108,6 @@ def time_downsample(input_dir, input_files, var, op, time_res, output_dir, varna
                         ws = 'ws' + v[0][1:]
     
                         ds[ws] = windspeed(ds[v[0]], ds[v[1]])
-                        ds[ws].attrs['units'] = 'm s**-1'
-                        ds[ws].attrs['long_name'] = v[0][1:] + '-meter wind speed'
     
                         # Resample by time, using selected aggregation method
                         if op[index] == 'max':
@@ -122,6 +122,9 @@ def time_downsample(input_dir, input_files, var, op, time_res, output_dir, varna
                             ds_agg = ds[ws].resample(time = time_res).mean()
                             if type(ds_agg) == xr.core.dataarray.DataArray:
                                 ds_agg = ds_agg.to_dataset()
+                        
+                        ds_agg[ws].attrs['units'] = 'm s**-1'
+                        ds_agg[ws].attrs['long_name'] = v[0][1:] + '-meter wind speed'
 
                     else:
                         # Resample by time, using selected aggregation method
@@ -165,9 +168,9 @@ def time_downsample(input_dir, input_files, var, op, time_res, output_dir, varna
         # File naming
         # Get the first and dates in the dataset as a string
         start_date = str(np.array(agg.isel(time = 0).time.values, 
-                              dtype = 'datetime64[{}]'.format('1D')).item())
+                              dtype = 'datetime64[{}]'.format(time_res)).item())
         edate = str(np.array(agg.isel(time = -1).time.values, 
-                              dtype = 'datetime64[{}]'.format('1D')).item())
+                              dtype = 'datetime64[{}]'.format(time_res)).item())
 
         if start_date == edate:
             end_date = ''
